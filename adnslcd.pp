@@ -135,13 +135,15 @@ class setup-ssh {
 	}
 
 	# AuthorizedKeysCommandUser is not supported prior to openSSH v6.2
-	#file_line { 'ssh_authorized_keys_command_user':
-	# ensure => present,
-	# path => "/etc/ssh/sshd_config",
-	# line => 'AuthorizedKeysCommandUser root',
-	# match => '^AuthorizedKeysCommandUser',
-	#}
-
+	if ($::sshd_version >= 6.2) {
+		file_line { 'ssh_authorized_keys_command_user':
+			ensure => present,
+			path => "/etc/ssh/sshd_config",
+			line => 'AuthorizedKeysCommandUser root',
+			match => '^AuthorizedKeysCommandUser',
+		}
+	}
+	
 	file_line { 'ssh_allowed_users':
         	path => "/etc/ssh/sshd_config",
         	line => "AllowGroups $linux_break_breakglass_account $ad_ssh_allow_groups",

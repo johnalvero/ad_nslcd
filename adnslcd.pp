@@ -14,6 +14,7 @@ $ad_base_search="dc=launchpad,dc=corp,dc=voyagerinnovation,dc=com"
 $ad_ssh_allow_groups="SE root"
 $linux_break_breakglass_account="ec2-user"
 
+
 ### End of Configuration Lines ###
 
 class eit-cacert {
@@ -142,6 +143,13 @@ class setup-ssh {
 			line => 'AuthorizedKeysCommandUser root',
 			match => '^AuthorizedKeysCommandUser',
 		}
+	} else {
+                file_line { 'ssh_authorized_keys_command_user':
+                        ensure => absent,
+                        path => "/etc/ssh/sshd_config",
+                        line => 'AuthorizedKeysCommandUser root',
+                        match => '^AuthorizedKeysCommandUser',
+                }
 	}
 	
 	file_line { 'ssh_allowed_users':

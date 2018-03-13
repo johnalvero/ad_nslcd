@@ -6,7 +6,7 @@ Linux integration for AD using nslcd. Features linux system, sudo, SSH Password,
   1. Install puppet. This is tested with puppet3\
      `yum install puppet3`
      
-  2. This integration stdlib from puppetlabs. Some distribution have this already, if not, install it\
+  2. This integration stdlib from puppetlabs. Some distribution have this already, if not, install it
      ```
      #Check if you have puppet stdlib
      puppet module list
@@ -16,8 +16,11 @@ Linux integration for AD using nslcd. Features linux system, sudo, SSH Password,
      ```
   3. Clone this repo
      `git clone https://github.com/VoyagerInnovations/ad_nslcd.git`
-  4. Copy custom facter to the correct folder \
-      `cp ad_nslcd/facter/* /etc/facter/facts.d/`
+  4. Copy custom facter to the correct folder
+      ```
+      cp ad_nslcd/facter/* /etc/facter/facts.d/
+      chmod +x /etc/facter/facts.d/*
+      ```
   5. Update adnslcd.pp with the correct parameters and credentials
   6. Apply the manifest file\
      `puppet apply adnslcd.pp`

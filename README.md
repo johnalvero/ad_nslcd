@@ -14,5 +14,8 @@ Linux integration for AD using nslcd. Features linux system, sudo, SSH Password,
      #Install it
      pupppet module install puppetlabs-stdlib --version 4.24.0
      ```
-  3. Apply the manifest file\
+  3. Clone this repo
+     `git clone https://github.com/VoyagerInnovations/ad_nslcd.git`
+  4. Update adnslcd.pp with the correct parameters and credentials
+  4. Apply the manifest file\
      `puppet apply adnslcd.pp`

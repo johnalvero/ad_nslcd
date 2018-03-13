@@ -1,5 +1,5 @@
 # ad_nslcd
-Linux integration for AD using nslcd. Features linux system, sudo, SSH Password, SSH Public Key Authentication
+Linux integration for AD using nslcd. Features linux system, sudo, SSH Password, SSH Public Key Authentication. This puppet manifest file is designed to be stand alone and master-less to minimize dependency on other existing systems.
 
 
 # How to apply

@@ -16,7 +16,7 @@ Linux integration for AD using nslcd. Features linux system, sudo, SSH Password,
      ```
   3. Clone this repo
      `git clone https://github.com/VoyagerInnovations/ad_nslcd.git`
-  4. Copy custom facter to the correct folder
+  4. Copy custom facter to the correct folder \
       `cp ad_nslcd/facter/* /etc/facter/facts.d/`
   5. Update adnslcd.pp with the correct parameters and credentials
   6. Apply the manifest file\

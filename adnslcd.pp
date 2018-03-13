@@ -2,8 +2,6 @@
 # 2 March 2018
 # Voyager EIT SSH LDAP Integration
 # 
-# Todo: Handle duplicates in file_line
-# Todo: 
 
 $ad_ip=""
 $ad_port="389"
@@ -132,7 +130,9 @@ class setup-ssh {
 # Setup SSHd AuthorizedKeysCommand
 	file_line { 'ssh_authorized_keys_command':
         	path => "/etc/ssh/sshd_config",
-        	line => 'AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386'
+        	line => 'AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386',
+		match => '^AuthorizedKeysCommand',
+		replace => true,
 	}
 
 	# AuthorizedKeysCommandUser is not supported prior to openSSH v6.2
@@ -142,6 +142,7 @@ class setup-ssh {
 			path => "/etc/ssh/sshd_config",
 			line => 'AuthorizedKeysCommandUser root',
 			match => '^AuthorizedKeysCommandUser',
+			replace => true,
 		}
 	} else {
                 file_line { 'ssh_authorized_keys_command_user':
@@ -149,12 +150,15 @@ class setup-ssh {
                         path => "/etc/ssh/sshd_config",
                         line => 'AuthorizedKeysCommandUser root',
                         match => '^AuthorizedKeysCommandUser',
+			replace => true,
                 }
 	}
 	
 	file_line { 'ssh_allowed_users':
         	path => "/etc/ssh/sshd_config",
         	line => "AllowGroups $linux_break_breakglass_account $ad_ssh_allow_groups",
+		match => '^AllowGroups',
+		replace => true,
 	}
 
 }

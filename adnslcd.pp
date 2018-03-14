@@ -209,7 +209,7 @@ class setup-services {
         	ensure => running,
         	name => "sshd",
         	enable => true,
-        	subscribe => [   File_line['ssh_authorized_keys_command'], File_line['ssh_allowed_users']     ],
+        	subscribe => [File_line['ssh_authorized_keys_command'], File_line['ssh_allowed_users'], File_line['ssh_authorized_keys_command_user']],
 	}
 
 	service { 'nslcd':

@@ -11,7 +11,7 @@ $ad_bindpw=""
 $ad_base_search="dc=launchpad,dc=corp,dc=voyagerinnovation,dc=com"
 $ad_sudo_base_search="OU=SUDOers,OU=Security Groups,OU=Groups,$ad_base_search"
 $ad_ssh_allow_groups="SE root"
-$linux_break_breakglass_account="ec2-user"
+$linux_breakglass_account="ec2-user"
 
 
 ### End of Configuration Lines ###
@@ -158,7 +158,7 @@ class setup-ssh {
 	
 	file_line { 'ssh_allowed_users':
         	path => "/etc/ssh/sshd_config",
-        	line => "AllowGroups $linux_break_breakglass_account $ad_ssh_allow_groups",
+        	line => "AllowGroups $linux_breakglass_account $ad_ssh_allow_groups",
 		match => '^AllowGroups',
 		replace => true,
 	}

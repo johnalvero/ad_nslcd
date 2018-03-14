@@ -9,6 +9,7 @@ $ad_hostname=""
 $ad_binddn=""
 $ad_bindpw=""
 $ad_base_search="dc=launchpad,dc=corp,dc=voyagerinnovation,dc=com"
+$ad_sudo_base_search="OU=SUDOers,OU=Security Groups,OU=Groups,$ad_base_search"
 $ad_ssh_allow_groups="SE root"
 $linux_break_breakglass_account="ec2-user"
 
@@ -182,7 +183,7 @@ class setup-main-config {
 	}
 
 	# Setup sudo LDAP config
-	$sudo_ldap_conf_template = "$ldap_conf_template\n\n# Sudo\nsudoers_base OU=Sudoers,$ad_base_search"
+	$sudo_ldap_conf_template = "$ldap_conf_template\n\n# Sudo\nsudoers_base $ad_sudo_base_search"
 
 	file { '/etc/sudo-ldap.conf':
         	ensure => file,

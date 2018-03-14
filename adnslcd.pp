@@ -26,6 +26,7 @@ class eit-cacert {
 	exec { 'retrieve_ca_cert_bundle':
         	command => "/usr/bin/wget -O /etc/openldap/cacerts/eit-root-ca.pem https://s3-ap-southeast-1.amazonaws.com/se-files/eit-root-ca.pem",
         	creates => "/etc/openldap/cacerts/eit-root-ca.pem",
+		require => File['create_ca_folder'],
 	}
 
 }

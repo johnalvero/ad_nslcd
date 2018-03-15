@@ -217,14 +217,14 @@ class setup-services {
         	ensure => running,
         	name => "nslcd",
         	enable => true,
-        	subscribe => File['/etc/ldap.conf'],
+        	subscribe => [File['/etc/ldap.conf'], Exec['retrieve_ca_cert_bundle']],
 	}
 
 	service { 'nscd':
         	ensure => running,
         	name => "nscd",
         	enable => true,
-        	subscribe => File['/etc/ldap.conf'],
+        	subscribe => [File['/etc/ldap.conf'], Exec['retrieve_ca_cert_bundle']],
 	}
 }
 

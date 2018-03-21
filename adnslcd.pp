@@ -40,6 +40,17 @@ class ssh-ad-wrapper {
         	command => "/usr/bin/wget -O /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386 https://s3-ap-southeast-1.amazonaws.com/se-files/ssh-ldap-ad-wrapper-i386 && chmod +x /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386",
         	creates => "/usr/libexec/openssh/ssh-ldap-ad-wrapper-i386",
 	}
+
+	# Setup the SSH AD Public key wrapper config
+	$ssh_ldap_ad_pubkey_template = "## Managed by Puppet, do not edit manually\n\nip $ad_ip_1\nport $ad_port_1\nhostname $ad_hostname_1\nbinddn $ad_binddn\nbindpw $ad_bindpw\nbase_search $ad_base_search\npubkey_property altSecurityIdentities\nserver_rootca /etc/openldap/cacerts/eit-root-ca.pem"
+
+	file { '/etc/ssh-ldap-ad.conf':
+        	ensure => file,
+        	content => inline_template($ssh_ldap_ad_pubkey_template),
+        	mode => 600,
+        	require => Exec['retrieve_ssh_ldap_ad_wrapper'],
+	}
+
 }
 
 class setup-nsswitch {
@@ -129,23 +140,23 @@ class setup-ssh {
 	}
 
 	# AuthorizedKeysCommandUser is not supported prior to openSSH v6.2
-        if ($::sshd_version >= 6.2) {
-                file_line { 'ssh_authorized_keys_command_user':
-                        ensure => present,
-                        path => "/etc/ssh/sshd_config",
-                        line => 'AuthorizedKeysCommandUser root',
-                        match => '^AuthorizedKeysCommandUser',
-                        replace => true,
-                }
-        } else {
+	if ($::sshd_version >= 6.2) {
+		file_line { 'ssh_authorized_keys_command_user':
+			ensure => present,
+			path => "/etc/ssh/sshd_config",
+			line => 'AuthorizedKeysCommandUser root',
+			match => '^AuthorizedKeysCommandUser',
+			replace => true,
+		}
+	} else {
                 file_line { 'ssh_authorized_keys_command_user':
                         ensure => present,
                         path => "/etc/ssh/sshd_config",
                         line => 'AuthorizedKeysCommandRunAs root',
                         match => '^AuthorizedKeysCommandRunAs',
-                        replace => true,
+			replace => true,
                 }
-        }
+	}
 	
 	file_line { 'ssh_allowed_users':
         	path => "/etc/ssh/sshd_config",
@@ -160,7 +171,7 @@ class setup-main-config {
 
 	# Main LDAP config
 
-	$ldap_conf_template = "# Managed by Puppet, do not edit manually\n\nldap_version 3\nuri ldap://$ad_hostname:$ad_port\nbase $ad_base_search\nbinddn $ad_binddn\nbindpw $ad_bindpw\ntimelimit 5\nbind_timelimit 10\nidle_timelimit 3600\npagesize 1000\nreferrals no\nscope sub\n\nssl start_tls\ntls_cacertfile /etc/openldap/cacerts/eit-root-ca.pem\ntls_reqcert demand\n\nfilter passwd (&(&(objectClass=person)(uidNumber=*)(gidNumber=*))(unixHomeDirectory=*))\nfilter shadow (&(&(objectClass=person)(uidNumber=*)(gidNumber=*))(unixHomeDirectory=*))\nfilter group  (&(objectClass=group)(gidNumber=*))\n\nmap    passwd   uid                     sAMAccountName\nmap    passwd   homeDirectory           unixHomeDirectory\nmap    passwd   gecos                   displayname\nmap    passwd   userPassword            \'\'\nmap    passwd   loginShell              loginShell\nmap    shadow   uid                     sAMAccountName\nmap    shadow   shadowLastChange        pwdLastSet\n"
+	$ldap_conf_template = "# Managed by Puppet, do not edit manually\n\nldap_version 3\nuri ldap://$ad_hostname_1:$ad_port_1\nuri ldap://$ad_hostname_2:$ad_port_2\nbase $ad_base_search\nbinddn $ad_binddn\nbindpw $ad_bindpw\ntimelimit 5\nbind_timelimit 10\nidle_timelimit 3600\npagesize 1000\nreferrals no\nscope sub\n\nssl start_tls\ntls_cacertfile /etc/openldap/cacerts/eit-root-ca.pem\ntls_reqcert demand\n\nfilter passwd (&(&(objectClass=person)(uidNumber=*)(gidNumber=*))(unixHomeDirectory=*))\nfilter shadow (&(&(objectClass=person)(uidNumber=*)(gidNumber=*))(unixHomeDirectory=*))\nfilter group  (&(objectClass=group)(gidNumber=*))\n\nmap    passwd   uid                     sAMAccountName\nmap    passwd   homeDirectory           unixHomeDirectory\nmap    passwd   gecos                   displayname\nmap    passwd   userPassword            \'\'\nmap    passwd   loginShell              loginShell\nmap    shadow   uid                     sAMAccountName\nmap    shadow   shadowLastChange        pwdLastSet\n"
 
 	file { '/etc/ldap.conf':
         	ensure => file,
@@ -187,11 +198,17 @@ class setup-main-config {
 
 class setup-dns {
 	# Add AD hostname in /etc/hosts
-	host { 'ad dns':
-        	name    => $ad_hostname,
-        	ip      => $ad_ip,
+	host { 'ad dns1':
+        	name    => $ad_hostname_1,
+        	ip      => $ad_ip_1,
         	ensure  => present,
 	}
+
+        host { 'ad dns2':
+                name    => $ad_hostname_2,
+                ip      => $ad_ip_2,
+                ensure  => present,
+        }
 }
 
 class setup-services {

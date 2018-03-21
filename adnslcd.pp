@@ -40,17 +40,6 @@ class ssh-ad-wrapper {
         	command => "/usr/bin/wget -O /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386 https://s3-ap-southeast-1.amazonaws.com/se-files/ssh-ldap-ad-wrapper-i386 && chmod +x /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386",
         	creates => "/usr/libexec/openssh/ssh-ldap-ad-wrapper-i386",
 	}
-
-	# Setup the SSH AD Public key wrapper config
-	$ssh_ldap_ad_pubkey_template = "## Managed by Puppet, do not edit manually\n\nip $ad_ip_1\nport $ad_port_1\nhostname $ad_hostname_1\nbinddn $ad_binddn\nbindpw $ad_bindpw\nbase_search $ad_base_search\npubkey_property altSecurityIdentities\nserver_rootca /etc/openldap/cacerts/eit-root-ca.pem"
-
-	file { '/etc/ssh-ldap-ad.conf':
-        	ensure => file,
-        	content => inline_template($ssh_ldap_ad_pubkey_template),
-        	mode => 600,
-        	require => Exec['retrieve_ssh_ldap_ad_wrapper'],
-	}
-
 }
 
 class setup-nsswitch {

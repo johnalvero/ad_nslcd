@@ -3,16 +3,18 @@
 # Voyager EIT SSH LDAP Integration
 # 
 
-$ad_ip=""
-$ad_port="389"
-$ad_hostname=""
+$ad_ip_1=""
+$ad_ip_2=""
+$ad_port_1="389"
+$ad_port_2="389"
+$ad_hostname_1="xxxxxxx.LAUNCHPAD.CORP.VOYAGERINNOVATION.COM"
+$ad_hostname_2="xxxxxxx.LAUNCHPAD.CORP.VOYAGERINNOVATION.COM"
 $ad_binddn=""
 $ad_bindpw=""
 $ad_base_search="dc=launchpad,dc=corp,dc=voyagerinnovation,dc=com"
 $ad_sudo_base_search="OU=SUDOers,OU=Security Groups,OU=Groups,$ad_base_search"
-$ad_ssh_allow_groups="SE root"
-$linux_breakglass_account="ec2-user"
-
+$ad_ssh_allow_groups="<group1> <group2> <etc>"
+$linux_breakglass_account="<local account>"
 
 ### End of Configuration Lines ###
 

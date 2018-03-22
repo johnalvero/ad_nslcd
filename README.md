@@ -1,7 +1,7 @@
-# ad_nslcd
+# AD Linux Integration (puppet)
 Linux integration for AD using nslcd. Features linux system, sudo, SSH Password, SSH Public Key Authentication. This puppet manifest file is designed to be stand alone and master-less to minimize dependency on other existing systems.
 
-# Pre-flight check
+## Pre-flight check
 Before applying this manifest, make sure that the following checks are performed to prevent being locked out of the instance
   1. Download the AD's root CA Cert bundle from  https://s3-ap-southeast-1.amazonaws.com/se-files/eit-root-ca.pem
   2. Verify connectivity, credentials and certificate by using https://github.com/johnalvero/verify_ldap_tls
@@ -9,7 +9,7 @@ Before applying this manifest, make sure that the following checks are performed
 
 
 
-# How to apply
+## How to apply
   1. Install puppet. This is tested with puppet3\
      `yum install puppet3`
      

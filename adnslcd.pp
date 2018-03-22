@@ -23,12 +23,13 @@ class eit-cacert {
 	file { 'create_ca_folder':
         	path    => "/etc/openldap/cacerts",
         	ensure  => directory,
+		require => Host['ad dns2'],
 	}
 
 	exec { 'retrieve_ca_cert_bundle':
         	command => "/usr/bin/wget -O /etc/openldap/cacerts/eit-root-ca.pem https://s3-ap-southeast-1.amazonaws.com/se-files/eit-root-ca.pem",
         	creates => "/etc/openldap/cacerts/eit-root-ca.pem",
-		require => File['create_ca_folder'],
+		require => [File['create_ca_folder'], Package['install_wget']]
 	}
 
 }
@@ -39,6 +40,7 @@ class ssh-ad-wrapper {
 	exec { 'retrieve_ssh_ldap_ad_wrapper':
         	command => "/usr/bin/wget -O /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386 https://s3-ap-southeast-1.amazonaws.com/se-files/ssh-ldap-ad-wrapper-i386 && chmod +x /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386",
         	creates => "/usr/libexec/openssh/ssh-ldap-ad-wrapper-i386",
+		require => Exec['retrieve_ca_cert_bundle'],
 	}
 }
 
@@ -49,6 +51,7 @@ class setup-nsswitch {
         	path => "/etc/nsswitch.conf",
         	match => '^passwd:',
         	replace => true,
+		require => File_line['ssh_allowed_users'],
 	}
 
 	file_line { 'nsshadow':
@@ -56,6 +59,7 @@ class setup-nsswitch {
         	path => "/etc/nsswitch.conf",
         	match => '^shadow:',
         	replace => true,
+		require => File_line['nspasswd']
 	}	
 
 	file_line { 'nsgroup':
@@ -63,6 +67,7 @@ class setup-nsswitch {
         	path => "/etc/nsswitch.conf",
         	match => '^group:',
         	replace => true,
+		require => File_line['nsshadow']
 	}
 
 	file_line { 'nssudo':
@@ -70,6 +75,7 @@ class setup-nsswitch {
         	path => "/etc/nsswitch.conf",
         	match => '^sudo:',
         	replace => true,
+		require => File_line['nsgroup'],
 	}
 }
 
@@ -81,41 +87,48 @@ class setup-pam {
         	path => "/etc/pam.d/password-auth-ac",
         	line => "auth        sufficient    pam_ldap.so use_first_pass",
         	after => '^auth\s*requisite\s*pam_succeed_if.so.*',
+		require => File['/etc/sudo-ldap.conf'],
 	}
 
 	file_line { 'pam_account':
         	path => "/etc/pam.d/password-auth-ac",
         	line => "account     [default=bad success=ok user_unknown=ignore] pam_ldap.so",
         	after => '^account\s*sufficient\s*pam_succeed_if.so.*',
+		require => File_line['pam_auth'],
 	}
 
 	file_line { 'pam_password':
         	path => "/etc/pam.d/password-auth-ac",
         	line => "password    sufficient    pam_ldap.so use_authtok",
         	after => '^password\s*sufficient\s*pam_unix.so.*',
+		require => File_line['pam_account'],
 	}
 
 	file_line { 'pam_session':
         	path => "/etc/pam.d/password-auth-ac",
         	line => "session     optional      pam_ldap.so",
         	after => '^session\s*required\s*pam_unix.so.*',
+		require => File_line['pam_password'],
 	}
 
 	file_line { 'pam_session_mkdir':
         	path => "/etc/pam.d/password-auth-ac",
         	line => "session     optional      pam_mkhomedir.so",
         	after => '^session\s*optional\s*pam_ldap.so.*',
+		require => File_line['pam_session'],
 	}
 
 	file { '/etc/pam.d/system-auth':
         	ensure => link,
         	target => "/etc/pam.d/password-auth-ac",
+		require => File_line['pam_session_mkdir'],
 	}
 
 	# LDAP PAM Config
 	file { '/etc/pam_ldap.conf':
         	ensure => link,
         	target => "/etc/ldap.conf",
+		require => File['/etc/pam.d/system-auth'],
 	}
 }
 
@@ -126,6 +139,7 @@ class setup-ssh {
         	line => 'AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386',
 		match => '^AuthorizedKeysCommand',
 		replace => true,
+		require => Exec['retrieve_ssh_ldap_ad_wrapper'],
 	}
 
 	# AuthorizedKeysCommandUser is not supported prior to openSSH v6.2
@@ -136,6 +150,7 @@ class setup-ssh {
 			line => 'AuthorizedKeysCommandUser root',
 			match => '^AuthorizedKeysCommandUser',
 			replace => true,
+			require => File_line['ssh_authorized_keys_command'],
 		}
 	} else {
                 file_line { 'ssh_authorized_keys_command_user':
@@ -144,6 +159,7 @@ class setup-ssh {
                         line => 'AuthorizedKeysCommandRunAs root',
                         match => '^AuthorizedKeysCommandRunAs',
 			replace => true,
+			require => File_line['ssh_authorized_keys_command'],
                 }
 	}
 	
@@ -152,6 +168,7 @@ class setup-ssh {
         	line => "AllowGroups $linux_breakglass_account $ad_ssh_allow_groups",
 		match => '^AllowGroups',
 		replace => true,
+		require => File_line['ssh_authorized_keys_command_user'],
 	}
 
 }
@@ -166,12 +183,14 @@ class setup-main-config {
         	ensure => file,
         	content => inline_template($ldap_conf_template),
         	mode => 600,
+		require => File_line['nssudo'],
 	}
 
 	# Setup nslcd.conf
 	file { '/etc/nslcd.conf':
         	ensure => link,
         	target => "/etc/ldap.conf",
+		require => File['/etc/ldap.conf'],
 	}
 
 	# Setup sudo LDAP config
@@ -181,6 +200,7 @@ class setup-main-config {
         	ensure => file,
         	content => inline_template($sudo_ldap_conf_template),
         	mode => 600,
+		require => File['/etc/nslcd.conf'],
 	}
 
 }
@@ -191,12 +211,14 @@ class setup-dns {
         	name    => $ad_hostname_1,
         	ip      => $ad_ip_1,
         	ensure  => present,
+		require => [Package['install_openssh-ldap'], Package['install_nss-pam-ldapd']]
 	}
 
         host { 'ad dns2':
                 name    => $ad_hostname_2,
                 ip      => $ad_ip_2,
                 ensure  => present,
+		require => Host['ad dns1'],
         }
 }
 
@@ -228,8 +250,29 @@ class setup-services {
 class install-packages {
 
 	$required_packages = ['openssh-ldap', 'nss-pam-ldapd', 'sudo', 'wget']
-	package { $required_packages: }
+	package { 'install_openssh-ldap':
+		name => "openssh-ldap",
+		ensure => present,
+		require => Package['install_nss-pam-ldapd'],
+	}
 
+        package { 'install_nss-pam-ldapd':
+                name => "nss-pam-ldapd",
+                ensure => present,
+		require => Package['install_sudo'],
+        }	
+
+        package { 'install_sudo':
+                name => "sudo",
+                ensure => present,
+		require => Package['install_wget'],
+        }
+
+        package { 'install_wget':
+                name => "wget",
+                ensure => present,
+        }
+	
 }
 
 include install-packages

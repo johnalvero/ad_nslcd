@@ -3,9 +3,9 @@ Linux integration for AD using nslcd. Features linux system, sudo, SSH Password,
 
 # Pre-flight check
 Before applying this manifest, make sure that the following checks are performed to prevent being locked out of the instance
-  1. TCP connectivity from the instance to the AD server's port 389 is established
+  1. TCP connectivity from the instance to the AD server's port 389 is established\
      ```telnet <ad-server> 389```
-  2. Bind user or service account user can authenticate to the AD server
+  2. Bind user or service account user can authenticate to the AD server\
      ```ldapsearch -x  -W -H ldap://<ad-server>:389 -D '<bind-user>' -b 'DC=LAUNCHPAD,DC=CORP,DC=VOYAGERINNOVATION,DC=COM'```
   3. Verify AD server's certificate
   4. Get the instance's SSH AD group from your AD Administrator e.g. SE

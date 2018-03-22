@@ -22,6 +22,20 @@ Linux integration for AD using nslcd. Features linux system, sudo, SSH Password,
       cp ad_nslcd/facter/* /etc/facter/facts.d/
       chmod +x /etc/facter/facts.d/*
       ```
-  5. Update adnslcd.pp with the correct parameters and credentials
+  5. Update the following parameters in the adnslcd.pp manifest. You should get the information from your AD administrator
+      ```
+      $ad_ip_1="1.1.1.1"
+      $ad_ip_2="2.2.2.2"
+      $ad_port_1="389"
+      $ad_port_2="389"
+      $ad_hostname_1="<ad-hostname-1>"
+      $ad_hostname_2="<ad-hostname-2>"
+      $ad_binddn="<bind-user>"
+      $ad_bindpw="<bind-password>"
+      $ad_base_search="dc=launchpad,dc=corp,dc=voyagerinnovation,dc=com"
+      $ad_sudo_base_search="OU=SUDOers,OU=Security Groups,OU=Groups,$ad_base_search"
+      $ad_ssh_allow_groups="<se-group> root"
+      $linux_breakglass_account="<service/breakglass account>"
+      ```
   6. Apply the manifest file\
      `puppet apply adnslcd.pp`

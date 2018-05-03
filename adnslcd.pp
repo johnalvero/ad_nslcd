@@ -137,7 +137,7 @@ class setup-ssh {
 	file_line { 'ssh_authorized_keys_command':
         	path => "/etc/ssh/sshd_config",
         	line => 'AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-ad-wrapper-i386',
-		match => '^AuthorizedKeysCommand',
+		match => '^AuthorizedKeysCommand\s+.*',
 		replace => true,
 		require => Exec['retrieve_ssh_ldap_ad_wrapper'],
 	}

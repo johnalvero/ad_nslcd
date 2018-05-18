@@ -118,12 +118,20 @@ class setup-pam {
 		require => File_line['pam_session'],
 	}
 
+	file_line { 'pam_remove_localuser':
+        	path => "/etc/pam.d/system-auth",
+        	line => '# auth        [default=1 ignore=ignore success=ok] pam_localuser.so',
+    		match => 'auth.*[default=1 ignore=ignore success=ok].*pam_localuser.so',
+    		replace => true,
+    		require => File['/etc/sudo-ldap.conf'],
+  	}
+
 	file { '/etc/pam.d/system-auth':
         	ensure => link,
         	target => "/etc/pam.d/password-auth-ac",
 		require => File_line['pam_session_mkdir'],
 	}
-
+	
 	# LDAP PAM Config
 	file { '/etc/pam_ldap.conf':
         	ensure => link,

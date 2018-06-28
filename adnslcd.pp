@@ -73,7 +73,7 @@ class setup-nsswitch {
 	file_line { 'nssudo':
         	line => 'sudoers:    ldap files',
         	path => "/etc/nsswitch.conf",
-        	match => '^sudo:',
+        	match => '^sudoers:',
         	replace => true,
 		require => File_line['nsgroup'],
 	}
